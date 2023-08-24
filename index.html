@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Chess</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<textarea readonly style="position: absolute; bottom: 0; right: 0; z-index: 20" rows="8">My PGN Here...</textarea>
+	<main>
+		<canvas id="miscCanvas"></canvas>
+		<canvas id="canvas"></canvas>
+		<div id="evalBar">
+			<div id="evalBarContent"></div>
+		</div>
+	</main>
+	<div id="coachMessageBox">
+		<table style="width: 100%" class="coach-message-layout">
+			<tr>
+				<td style="width: 52px">
+					<img src="sprites/toonchess/white_knight.png" style="width: 52px">
+				</td>
+				<td id="coachMessageText">
+					<h3 style="opacity: 0.5; margin: 0"><i>Unhelpful</i> Coach</h3>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<script src="js/maps.js"></script>
+	<script src="js/utils.js"></script>
+	<script src="js/check.js"></script>
+	<script src="js/grid.js"></script>
+	<script src="js/piece.js"></script>
+	<script src="js/spriteDisplay.js"></script>
+	<script src="js/squareAttacked.js"></script>
+	<script src="js/highlight.js"></script>
+	<script src="js/moveString.js"></script>
+	<script src="js/kingToEdge.js"></script>
+	<script src="js/move.js"></script>
+	<script src="js/load.js"></script>
+	<script src="js/moveGeneration.js"></script>
+	<script src="js/coach.js"></script>
+	<script src="js/castling.js"></script>
+	<script src="js/gameOver.js"></script>
+	<script src="js/evaluate.js"></script>
+	<script src="js/ai.js"></script>
+	<script src="js/book.js"></script>
+	<script src="js/main.js"></script>
+</body>
+</html>
