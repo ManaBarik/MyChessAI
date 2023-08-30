@@ -249,7 +249,8 @@ function updateBoardInfo(board) {
 }
 
 function translateToFileRank(moveString) {
-	var { fromGrid, toGrid } = getMoveStringInfo(moveString[0]);
+	var fromGrid = FROMSQUARE(moveString[0]);
+	var toGrid = TOSQUARE(moveString[0]);
 	
 	var string = "";
 	

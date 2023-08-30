@@ -8,7 +8,8 @@ function makeMove(board, moveString, useAnimation = true, drawTrail = true, move
 			grid.pressed = false;
 		});
 		
-		var { fromGrid, toGrid } = getMoveStringInfo(moveString[0]);
+		var fromGrid = FROMSQUARE(moveString[0]);
+		var toGrid = TOSQUARE(moveString[0]);
 		
 		grids[fromGrid].trail = true;
 		grids[toGrid].trail = true;
@@ -26,7 +27,12 @@ function makeMove(board, moveString, useAnimation = true, drawTrail = true, move
 	var _map;
 	
 	for(var i = 0; i < moveString.length; i++) {
-		var { index, fromGrid, toGrid, captureIndex, isPromoting } = getMoveStringInfo(moveString[i]);
+		var index = PIECEINDEX(moveString[i]);
+		var fromGrid = FROMSQUARE(moveString[i]);
+		var toGrid = TOSQUARE(moveString[i]);
+		var captureIndex = CAPTUREINDEX(moveString[i]);
+		var isPromoting = ISPROMOTING(moveString[i]);
+		var noCapture = NOCAPTURE(moveString[i]);
 		
 		var king = pieces[kingIndex[pieces[index].team == player ? "player" : "enemy"]];
 		var enemyKing = pieces[kingIndex[pieces[index].team == player ? "enemy" : "player"]];
@@ -231,7 +237,7 @@ function makeMove(board, moveString, useAnimation = true, drawTrail = true, move
 			}
 		}
 		
-		if(captureIndex != -1) {
+		if(!noCapture) {
 			pieces[captureIndex].captured = true;
 			
 			// updates position key
@@ -272,7 +278,12 @@ function unMakeMove(board, moveString) {
 	// board.repetitionMoveHistory[board.posKey]--;
 	
 	for(var i = 0; i < moveString.length; i++) {
-		var { index, fromGrid, toGrid, captureIndex, isPromoting, isCastling } = getMoveStringInfo(moveString[i]);
+		var index = PIECEINDEX(moveString[i]);
+		var fromGrid = FROMSQUARE(moveString[i]);
+		var toGrid = TOSQUARE(moveString[i]);
+		var captureIndex = CAPTUREINDEX(moveString[i]);
+		var isPromoting = ISPROMOTING(moveString[i]);
+		var noCapture = NOCAPTURE(moveString[i]);
 		
 		switch(pieces[index].type) {
 			case piece.pawn:
@@ -331,7 +342,7 @@ function unMakeMove(board, moveString) {
 			pieceGrid[toGrid + 1].enPassantCapture = -1;
 		}
 		
-		if(captureIndex != -1) {
+		if(!noCapture) {
 			pieces[captureIndex].captured = false;
 			
 			pieceGrid[pieces[captureIndex].pos] = pieces[captureIndex];

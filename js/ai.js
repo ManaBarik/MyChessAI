@@ -1,7 +1,7 @@
 var searchOption = {
 	start: 0,
 	stop: false,
-	time: 3000,
+	time: 3500,
 	best: [],
 	nodes: 0,
 	R: 2,
@@ -46,7 +46,7 @@ function bestMoves(board, depth, firstTurn, useBook = true) {
 				
 				turn = changeTurn(board, false, false);
 				
-				var score = -minimax(board, currentDepth - 1, -Infinity, Infinity, firstTurn, currentDepth, move, true, 0);
+				var score = -alphaBeta(board, currentDepth - 1, -Infinity, Infinity, firstTurn, currentDepth, move, true, 0);
 				
 				turn = changeTurn(board, false, false);
 				
@@ -113,7 +113,7 @@ function bestMoves(board, depth, firstTurn, useBook = true) {
 	return searchOption.best;
 }
 
-function minimax(board, depth, alpha, beta, firstTurn, startDepth, lastMove, useNullMove = true, numExtension = 0) {
+function alphaBeta(board, depth, alpha, beta, firstTurn, startDepth, lastMove, useNullMove = true, numExtension = 0) {
 	var { turn, positionHistory } = board;
 
 	var perspective = turn == player ? 1 : -1;
@@ -132,28 +132,21 @@ function minimax(board, depth, alpha, beta, firstTurn, startDepth, lastMove, use
 		checkTime(searchOption);
 	}
 	
-	// null move pruning to
+	// null move pruning
 	
 	if(useNullMove && !inCheck(board, turn) && depth > 2) {
-		var score = minimax(board, depth - searchOption.R, -beta, -alpha, firstTurn, startDepth, false);
+		var score = alphaBeta(board, depth - searchOption.R, -beta, -beta + 1, firstTurn, startDepth, lastMove, false, numExtension);
 		
 		if(score >= beta) {
 			return beta;
 		}
 	}
 	
-	var moves = generateMoves(board, turn, true);
+	var moves = generatePseudoLegalMoves(board, turn);
 	
 	moves = orderMoves(board, moves);
 	
-	var g = isGameOver(board, moves, turn);
-	
-	if(g.boolean) {
-		if(g.type == 0) {
-			return -mateValue + 100 * (startDepth - depth);
-		}
-		return 0;
-	}
+	var hasMoved = false;
 	
 	for(var i = 0; i < moves.length; i++) {
 		var move = moves[i];
@@ -161,11 +154,19 @@ function minimax(board, depth, alpha, beta, firstTurn, startDepth, lastMove, use
 		
 		pieces = makeMove(board, move, false, false, false);
 		
+		if(inCheck(board, turn)) {
+			pieces = unMakeMove(board, move);
+			
+			continue;
+		}
+		
+		hasMoved = true;
+		
 		turn = changeTurn(board, false, false);
 		
 		var extension = numExtension < searchOption.maxSearchExtension && inCheck(board, turn) ? 1 : 0;
 		
-		score = -minimax(board, depth - 1 + extension, -beta, -alpha, firstTurn, startDepth, move, useNullMove, numExtension + extension);
+		score = -alphaBeta(board, depth - 1 + extension, -beta, -alpha, firstTurn, startDepth, move, useNullMove, numExtension + extension);
 		
 		turn = changeTurn(board, false, false);
 		
@@ -176,6 +177,14 @@ function minimax(board, depth, alpha, beta, firstTurn, startDepth, lastMove, use
 		if(score >= beta) {
 			return beta;
 		}
+	}
+	
+	if(!hasMoved) {
+		if(inCheck(board, turn)) {
+			return -mateValue + 100 * (startDepth - depth);
+		}
+		
+		return 0;
 	}
 	
 	return alpha;
@@ -197,13 +206,11 @@ function quiescenceSearch(board, alpha, beta, firstTurn, startDepth, lastMove) {
 	
 	checkTime(searchOption);
 	
-	var evaluation = evaluate(board, lastMove) * perspective;
+	var realEval = inCheck(board, board.turn) ? mateValue : evaluate(board, lastMove) * perspective;
 	
-	if(evaluation >= beta) {
+	if(realEval >= beta) {
 		return beta;
 	}
-	
-	alpha = Math.max(alpha, evaluation);
 	
 	var moves = generateMoves(board, turn, true, true);
 	moves = orderMoves(board, moves);
@@ -224,22 +231,20 @@ function quiescenceSearch(board, alpha, beta, firstTurn, startDepth, lastMove) {
 		
 		turn = changeTurn(board, false, false);
 		
-		perspective = board.turn == player ? 1 : -1;
-		
-		var score = evaluate(board, lastMove) * perspective;
-		
-		turn = changeTurn(board, false, false);
-		
-		perspective = board.turn == player ? 1 : -1;
+		var evaluation = -quiescenceSearch(board, -beta, -alpha, firstTurn, startDepth, lastMove);
 		
 		pieces = unMakeMove(board, move);
 		
-		alpha = Math.max(alpha, score);
-		
-		if(score >= beta) {
-			return beta;
+		if(evaluation > realEval) {
+			if(evaluation >= beta) {
+				return beta;
+			}
+			
+			alpha = Math.max(alpha, evaluation);
+			
+			realEval = evaluation;
 		}
 	}
 	
-	return alpha;
+	return realEval;
 }

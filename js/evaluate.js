@@ -1,8 +1,7 @@
 function evaluate(board, lastMove) {
 	var { pieces, attackingGridEval } = board;
-	var lastMoveInfo = getMoveStringInfo(lastMove[0]);
-	var lastMoveIndex = lastMoveInfo.index;
-	var lastMoveToGrid = lastMoveInfo.toGrid;
+	var lastMoveIndex = PIECEINDEX(lastMove[0]);
+	var lastMoveToGrid = TOSQUARE(lastMove[0]);
 	
 	var whiteEval = countMaterial(board, player);
 	var blackEval = countMaterial(board, enemy);

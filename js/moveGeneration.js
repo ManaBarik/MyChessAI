@@ -805,7 +805,7 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 						*/
 						
 						if(team == player &&
-						pieceGrid[60] != undefined && pieceGrid[60].isType(piece.king) && pieceGrid[60].isTeam(player)) {
+						pieceGrid[60] != undefined && pieceGrid[60].isType(piece.king) && pieceGrid[60].isTeam(player) && !isGridAttacked(board, 60, player)) {
 							if(pieceGrid[61] == undefined && pieceGrid[62] == undefined &&
 							!isGridAttacked(board, 61, player) && !isGridAttacked(board, 62, player) &&
 							pieceGrid[63] != undefined && pieceGrid[63].isType(piece.rook) && pieceGrid[63].isTeam(player) &&
@@ -849,7 +849,7 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 							}
 						}
 						else if(team == enemy &&
-						pieceGrid[4] != undefined && pieceGrid[4].isType(piece.king) && pieceGrid[4].isTeam(enemy)) {
+						pieceGrid[4] != undefined && pieceGrid[4].isType(piece.king) && pieceGrid[4].isTeam(enemy) && !isGridAttacked(board, 4, enemy)) {
 							if(pieceGrid[5] == undefined && pieceGrid[6] == undefined &&
 							!isGridAttacked(board, 5, enemy) && !isGridAttacked(board, 6, enemy) &&
 							pieceGrid[7] != undefined && pieceGrid[7].isType(piece.rook) && pieceGrid[7].isTeam(enemy) &&
@@ -1033,7 +1033,12 @@ function orderMoves(board, moves) {
 	for(var i = 0; i < moves.length; i++) {
 		var move = moves[i];
 		
-		var { index, fromGrid, toGrid, captureIndex, isPromoting } = getMoveStringInfo(move[0]);
+		var index = PIECEINDEX(move[0]);
+		var fromGrid = FROMSQUARE(move[0]);
+		var toGrid = TOSQUARE(move[0]);
+		var captureIndex = CAPTUREINDEX(move[0]);
+		var isPromoting = ISPROMOTING(move[0]);
+		var noCapture = NOCAPTURE(move[0]);
 		
 		var moveScoreGuess = 0;
 		var movePieceType = pieces[index].type;
@@ -1081,4 +1086,537 @@ function orderMoves(board, moves) {
 	});
 	
 	return newMoves;
+}
+
+function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onlyGenerateCaptures = false) {
+	var { pieces, pieceGrid, kingIndex, attackingGridEval } = board;
+	
+	var moves = [];
+	
+	// main move generation
+	
+	for(var i = 0; i < pieces.length; i++) {
+		pieces[i].isMoving = false;
+		
+		if(pieces[i].isTeam(team) && !pieces[i].captured) {
+			if(pieces[i].isSlidingPiece()) {
+				moves = generatePseudoLegalSlidingMoves(board, pieces[i].pos, i, moves, onlyGenerateCaptures);
+			}
+			if(pieces[i].isType(piece.pawn)) {
+				if(pieces[i].enPassantCapture != -1) {
+					if(!onlyGenerateCaptures || (onlyGenerateCaptures && pieces[i].enPassantCapture != -1)) {
+						moves.push([Move(
+							i,
+							pieces[i].pos,
+							pieces[i].enPassantTo,
+							pieces[i].enPassantCapture,
+							0,
+							0
+						)]);
+					}
+				}
+				
+				var dirOffset = (pieces[i].isTeam(player)) ? -8 : 8;
+				
+				var targetGrid = pieces[i].pos + dirOffset;
+				
+				if(targetGrid >= 0 && targetGrid < 64) {
+					var _c = false;
+					var _c2 = false;
+					var Ctl = -1;
+					var Ctr = -1;
+					
+					var targetPiece = pieceGrid[targetGrid];
+					
+					if(targetPiece != null && !targetPiece.captured) {
+						targetGridPiece = targetPiece.index;
+						_c = true;
+					}
+					if(pieceGrid[targetGrid + (pieces[i].isTeam(player) ? -8 : 8)] != null && !pieceGrid[targetGrid + (pieces[i].isTeam(player) ? -8 : 8)].captured) {
+						targetGridPiece = pieceGrid[targetGrid + (pieces[i].isTeam(player) ? -8 : 8)].index;
+						_c2 = true;
+					}
+					if(pieceGrid[targetGrid - 1] != null && !pieceGrid[targetGrid - 1].isTeam(pieces[i].team) && !pieceGrid[targetGrid - 1].captured && targetGrid % 8 - 1 >= 0) {
+						Ctl = pieceGrid[targetGrid - 1].index;
+					}
+					if(pieceGrid[targetGrid + 1] != null && !pieceGrid[targetGrid + 1].isTeam(pieces[i].team) && !pieceGrid[targetGrid + 1].captured && targetGrid % 8 + 1 < 8) {
+						Ctr = pieceGrid[targetGrid + 1].index;
+					}
+					
+					if(!_c) {
+						if(pieces[i].canMoveTo[targetGrid] && !onlyGenerateCaptures) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								targetGrid,
+								-1,
+								((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
+								0
+							)]);
+						}
+						
+						// double pawns
+						
+						if(!_c2 && ((pieces[i].isTeam(player) && pieces[i].pos >= 48) || (pieces[i].isTeam(enemy) && pieces[i].pos < 16))) {
+							var doublePawnOffset = (pieces[i].isTeam(player)) ? -8 : 8
+							
+							if(pieces[i].canMoveTo[targetGrid + doublePawnOffset] && !onlyGenerateCaptures) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									targetGrid + doublePawnOffset,
+									-1,
+									0,
+									0
+								)]);
+							}
+						}
+					}
+					if(Ctl != -1) {
+						if(pieces[i].canMoveTo[targetGrid - 1]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctl != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									targetGrid - 1,
+									Ctl,
+									((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
+									0
+								)]);
+							}
+						}
+					}
+					if(Ctr != -1) {
+						if(pieces[i].canMoveTo[targetGrid + 1]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctr != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									targetGrid + 1,
+									Ctr,
+									((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
+									0
+								)]);
+							}
+						}
+					}
+				}
+			}
+			if(pieces[i].isType(piece.knight)) {
+				var t = pieces[i].pos - 16;
+				var l = pieces[i].pos - 2;
+				var r = pieces[i].pos + 2;
+				var b = pieces[i].pos + 16;
+				var tl = t - 1, ctl = false, Ctl = -1, tr = t + 1, ctr = false, Ctr = -1;
+				var lt = l - 8, clt = false, Clt = -1, lb = l + 8, clb = false, Clb = -1;
+				var rt = r - 8, crt = false, Crt = -1, rb = r + 8, crb = false, Crb = -1;
+				var bl = b - 1, cbr = false, Cbr = -1, br = b + 1, cbl = false, Cbl = -1;
+				
+				if(pieceGrid[tl] != null) {
+					ctl = true;
+					
+					if(!pieceGrid[tl].isTeam(team)) {
+						Ctl = pieceGrid[tl].index;
+					}
+				}
+				if(pieceGrid[tr] != null) {
+					ctr = true;
+					
+					if(!pieceGrid[tr].isTeam(team)) {
+						Ctr = pieceGrid[tr].index;
+					}
+				}
+				if(pieceGrid[lt] != null) {
+					clt = true;
+					
+					if(!pieceGrid[lt].isTeam(team)) {
+						Clt = pieceGrid[lt].index;
+					}
+				}
+				if(pieceGrid[lb] != null) {
+					clb = true;
+					
+					if(!pieceGrid[lb].isTeam(team)) {
+						Clb = pieceGrid[lb].index;
+					}
+				}
+				if(pieceGrid[rt] != null) {
+					crt = true;
+					
+					if(!pieceGrid[rt].isTeam(team)) {
+						Crt = pieceGrid[rt].index;
+					}
+				}
+				if(pieceGrid[rb] != null) {
+					crb = true;
+					
+					if(!pieceGrid[rb].isTeam(team)) {
+						Crb = pieceGrid[rb].index;
+					}
+				}
+				if(pieceGrid[bl] != null) {
+					cbl = true;
+					
+					if(!pieceGrid[bl].isTeam(team)) {
+						Cbl = pieceGrid[bl].index;
+					}
+				}
+				if(pieceGrid[br] != null) {
+					cbr = true;
+					
+					if(!pieceGrid[br].isTeam(team)) {
+						Cbr = pieceGrid[br].index;
+					}
+				}
+				
+				if((!ctl || Ctl != -1) && tl >= 0 && tl < 64 && t % 8 - 1 >= 0 && t >= 0) {
+						if(pieces[i].canMoveTo[tl]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctl != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									tl,
+									Ctl,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+				if((!ctr || Ctr != -1) && tr >= 0 && tr < 64 && t % 8 + 1 < 8 && t >= 0) {
+						if(pieces[i].canMoveTo[tr]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctr != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									tr,
+									Ctr,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+				if((!clt || Clt != -1) && lt >= 0 && lt < 64 && pieces[i].pos % 8 - 2 >= 0) {
+						if(pieces[i].canMoveTo[lt]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Clt != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									lt,
+									Clt,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+				if((!clb || Clb != -1) && lb >= 0 && lb < 64 && pieces[i].pos % 8 - 2 >= 0) {
+						if(pieces[i].canMoveTo[lb]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Clb != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									lb,
+									Clb,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+				if((!crt || Crt != -1) && rt >= 0 && rt < 64 && pieces[i].pos % 8 + 2 < 8) {
+						if(pieces[i].canMoveTo[rt]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Crt != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									rt,
+									Crt,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+				if((!crb || Crb != -1) && rb >= 0 && rb < 64 && pieces[i].pos % 8 + 2 < 8) {
+						if(pieces[i].canMoveTo[rb]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Crb != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									rb,
+									Crb,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+				if((!cbl || Cbl != -1) && bl >= 0 && bl < 64 && b % 8 - 1 >= 0 && b < 64) {
+						if(pieces[i].canMoveTo[bl]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Cbl != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									bl,
+									Cbl,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+				if((!cbr || Cbr != -1) && br >= 0 && br < 64 && b % 8 + 1 < 8 && b < 64) {
+						if(pieces[i].canMoveTo[br]) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Cbr != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									br,
+									Cbr,
+									0,
+									0
+								)]);
+							}
+						}
+				}
+			}
+			if(pieces[i].isType(piece.king)) {
+				if(generateCastlingMoves) {
+					var rooks = [-1, -1];
+					
+					if(team == player) {
+						if(pieceGrid[56] != null && pieceGrid[56].isType(piece.rook) && pieceGrid[56].isTeam(player)) {
+							rooks[0] = pieceGrid[56].index;
+						}
+						if(pieceGrid[63] != null && pieceGrid[63].isType(piece.rook) && pieceGrid[63].isTeam(player)) {
+							rooks[1] = pieceGrid[63].index;
+						}
+					}
+					if(team == enemy) {
+						if(pieceGrid[0] != null && pieceGrid[0].isType(piece.rook) && pieceGrid[0].isTeam(enemy)) {
+							rooks[0] = pieceGrid[0].index;
+						}
+						if(pieceGrid[7] != null && pieceGrid[7].isType(piece.rook) && pieceGrid[7].isTeam(enemy)) {
+							rooks[1] = pieceGrid[7].index;
+						}
+					}
+					
+					// castling
+					if(!onlyGenerateCaptures) {
+						/*
+						if(canCastle(board, team, "short")) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								pieces[i].pos + 2,
+								-1,
+								0,
+								1
+							), Move(
+								rooks[1],
+								pieces[rooks[1]].pos,
+								pieces[i].pos + 1,
+								-1,
+								0,
+								1
+							)]);
+						}
+						if(canCastle(board, team, "long")) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								pieces[i].pos - 2,
+								-1,
+								0,
+								1
+							), Move(
+								rooks[0],
+								pieces[rooks[0]].pos,
+								pieces[i].pos - 1,
+								-1,
+								0,
+								1
+							)]);
+						}
+						*/
+						
+						if(team == player &&
+						pieceGrid[60] != undefined && pieceGrid[60].isType(piece.king) && pieceGrid[60].isTeam(player) && !isGridAttacked(board, 60, player)) {
+							if(pieceGrid[61] == undefined && pieceGrid[62] == undefined &&
+							!isGridAttacked(board, 61, player) && !isGridAttacked(board, 62, player) &&
+							pieceGrid[63] != undefined && pieceGrid[63].isType(piece.rook) && pieceGrid[63].isTeam(player) &&
+							board.castlePerm & castleBit.wk) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									pieces[i].pos + 2,
+									-1,
+									0,
+									1
+								), Move(
+									pieceGrid[63].index,
+									pieceGrid[63].pos,
+									pieces[i].pos + 1,
+									-1,
+									0,
+									1
+								)]);
+							}
+							
+							if(pieceGrid[59] == undefined && pieceGrid[58] == undefined && pieceGrid[57] == undefined &&
+							!isGridAttacked(board, 59, player) && !isGridAttacked(board, 58, player) &&
+							pieceGrid[56] != undefined && pieceGrid[56].isType(piece.rook) && pieceGrid[56].isTeam(player) &&
+							board.castlePerm & castleBit.wq) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									pieces[i].pos - 2,
+									-1,
+									0,
+									1
+								), Move(
+									pieceGrid[56].index,
+									pieceGrid[56].pos,
+									pieces[i].pos - 1,
+									-1,
+									0,
+									1
+								)]);
+							}
+						}
+						else if(team == enemy &&
+						pieceGrid[4] != undefined && pieceGrid[4].isType(piece.king) && pieceGrid[4].isTeam(enemy) && !isGridAttacked(board, 4, enemy)) {
+							if(pieceGrid[5] == undefined && pieceGrid[6] == undefined &&
+							!isGridAttacked(board, 5, enemy) && !isGridAttacked(board, 6, enemy) &&
+							pieceGrid[7] != undefined && pieceGrid[7].isType(piece.rook) && pieceGrid[7].isTeam(enemy) &&
+							board.castlePerm & castleBit.bk) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									pieces[i].pos + 2,
+									-1,
+									0,
+									1
+								), Move(
+									pieceGrid[7].index,
+									pieceGrid[7].pos,
+									pieces[i].pos + 1,
+									-1,
+									0,
+									1
+								)]);
+							}
+							
+							if(pieceGrid[3] == undefined && pieceGrid[2] == undefined && pieceGrid[1] == undefined &&
+							!isGridAttacked(board, 3, enemy) && !isGridAttacked(board, 2, player) &&
+							pieceGrid[0] != undefined && pieceGrid[0].isType(piece.rook) && pieceGrid[0].isTeam(enemy) &&
+							board.castlePerm & castleBit.bq) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									pieces[i].pos - 2,
+									-1,
+									0,
+									1
+								), Move(
+									pieceGrid[0].index,
+									pieceGrid[0].pos,
+									pieces[i].pos - 1,
+									-1,
+									0,
+									1
+								)]);
+							}
+						}
+					}
+				}
+				for(var dirIndex = 0; dirIndex < 8; dirIndex++) {
+					var targetGrid = pieces[i].pos + directionOffsets[dirIndex];
+					if(targetGrid >= 0 && targetGrid < 64) {
+						var targetGridPiece = -1;
+						
+						var targetPiece = pieceGrid[targetGrid];
+						if(targetPiece != null && !targetPiece.captured) {
+							targetGridPiece = targetPiece.index;
+						}
+						
+						var _c = false;
+						
+						if(targetGridPiece != -1 && pieces[targetGridPiece].isTeam(pieces[i].team) && !pieces[targetGridPiece].captured) {
+							_c = true;
+						}
+						
+						var normalizedDir = (directionOffsets[dirIndex] == 1 || directionOffsets[dirIndex] == 9 || directionOffsets[dirIndex] == -7) ? 1 : -1;
+						
+						if(directionOffsets[dirIndex] % 8 != 0) {
+							if(pieces[i].pos % 8 + normalizedDir >= 8) {
+								_c = true;
+							}
+							if(pieces[i].pos % 8 + normalizedDir < 0) {
+								_c = true;
+							}
+						}
+						
+						if(!_c) {
+							if(!onlyGenerateCaptures || (onlyGenerateCaptures && targetGridPiece != -1)) {
+								moves.push([Move(
+									i,
+									pieces[i].pos,
+									targetGrid,
+									(targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[i].team) ? targetGridPiece : -1,
+									0,
+									0
+								)]);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return moves;
+}
+
+function generatePseudoLegalSlidingMoves(board, pos, index, moves, onlyGenerateCaptures) {
+	var { pieces, pieceGrid, attackingGridEval } = board;
+	
+	var startDirIndex = (pieces[index].isType(piece.bishop)) ? 4 : 0;
+	var endDirIndex = (pieces[index].isType(piece.rook)) ? 4 : 8;
+	
+	for(var i = startDirIndex; i < endDirIndex; i++) {
+		for(var n = 0; n < distToEdge[pos][i]; n++) {
+			var targetGrid = pos + directionOffsets[i] * (n + 1);
+			var targetGridPiece = -1;
+			
+			if(pieceGrid[targetGrid] != null && !pieceGrid[targetGrid].captured) {
+				targetGridPiece = pieceGrid[targetGrid].index;
+			}
+			
+			if(targetGridPiece != -1 && pieces[targetGridPiece].isTeam(pieces[index].team) && !pieces[targetGridPiece].captured) {
+				break;
+			}
+			
+				if(pieces[index].canMoveTo[targetGrid]) {
+					if(!onlyGenerateCaptures || (onlyGenerateCaptures && targetGridPiece != -1)) {
+						moves.push([Move(
+							index,
+							pieces[index].pos,
+							targetGrid,
+							(targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[index].team) ? targetGridPiece : -1,
+							0,
+							0
+						)]);
+					}
+			}
+			
+			if(targetGridPiece != -1 && !pieces[targetGridPiece].isTeam(pieces[index].team) && !pieces[targetGridPiece].captured) {
+				break;
+			}
+		}
+	}
+	
+	return moves;
 }

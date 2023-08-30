@@ -147,10 +147,16 @@ var books = [
 	"e2e4 c7c6 b1c3 d7d5 d2d4 d5e4 c3e4 c8f5 e4g3 f5g6",
 	"e2e4 c7c6 g1f3 d7d5 e4d5 c6d5",
 	"e2e4 c7c6 d2d4 d7d5 e4d5 c6d5",
-	"e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 f1e2", // advance variation
+	"e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 f1e2",
+	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 c8f5 e4g3 f5g6 h2h4 h7h6 g1f3 b8d7 h4h5 g6h7 f1d3 h7d3 d1d3 e7e6 c1f4 g8f6",
+	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 e4f6 e7f6 f1d3 f8d6 g1f3 b8d7",
+	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 f1d3 e7e6 g1f3 b8d7",
+	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 e4f6 e7f6 g1f3 c8g4 f1d3 f8d6",
+	//advance variation
 	"e2e4 c7c6 f1c4 d7d5 e4d5 c6d5 c4b3 g8f6",
 	"e2e4 c7c6 c2c4 d7d5 c4d5 c6d5 e4d5 d8d5 b1c3 d5a5 d2d4 g8f6",
 	"e2e4 c7c6 c2c4 d7d5 e4d5 c6d5 c4d5 d8d5 b1c3 d5a5 d2d4 g8f6",
+	"e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 h2h4 h7h5 f1d3 f5d3 d1d3 b8d7 g1f3 e7e6",
 	
 	/* pirc defence */
 	"e2e4 d7d6 d2d4 g8f6 b1c3 e7e5 d4e5 d6e5 d1d8 e8d8 f1c4 f8b4",
@@ -200,7 +206,7 @@ var books = [
 	"d2d4 d7d5 c1f4 b8c6 g1f3 f7f6 b1c3 e7e5 d4e5 f6e5 f4g3 g8f6", */ // london system punish
 	/* london systems */
 	"d2d4 d7d5 c1f4 g8f6 g1f3 e7e6 e2e3 c7c5 c2c3 b8c6 f1d3 f8d6 f4g3 c8d7 b1d2",
-	"d2d4 g8f6 c1f4 e7e6 g1f3 d7d5 e2e3 f8d6 f4g3 c7c5 c2c3 b8c6 f1d3 c8d7 b1d2",
+	"d2d4 g8f6 c1f4 e7e6 g1f3 d7d5 e2e3 f8d6 f4g3 c7c5 c2c3 b8c6 f1d3 d6g3",
 	"d2d4 d7d5 c2c4 e7e6 c1f4 g8f6 g1f3 c7c6 e2e3 b8d7 f1d3 f8e7 b1c3",
 	"d2d4 g8f6 c1f4 d7d5 e2e3 e7e6 g1f3 c7c6 c2c4 b8d7 f1d3 f8e7 b1c3",
 	"d2d4 d7d5 c2c4 e7e6 b1c3 g8f6 c1f4 c7c6 g1f3 f8d6 f4d6 d8d6 e2e3 b8d7 f1d3",

@@ -27,7 +27,7 @@ var pieceSpriteStyle = "icy_sea";
 // squareColors = [[dark, light]];
 var squareColors = [["#CE5B00", "#E7A848"], ["#CD8543", "#EAC983"], ["#B0CEFF", "white"],
   ["#40C848", "#D8F3DA"]];
-var squareColor = 2;
+var squareColor = 1;
 
 var press = {
 	x: 0,
@@ -137,8 +137,8 @@ var clocks = [
 ];
 var timerInterval;
 
-var playerTime = 180;
-var enemyTime = 180;
+var playerTime = 30;
+var enemyTime = 15;
 
 // ai on time control
 
@@ -149,9 +149,9 @@ var enemySearchSpeed = {
 	lowerThanPlayer: 2500,
 	nearTimeoutLowerThanPlayer: 2000,
 	nearTimeoutGreaterThanPlayer: 3000,
-	belowTenSecond: 800,
-	belowFiveSecond: 200,
-	belowThreeSecond: 100,
+	belowTenSecond: 600,
+	belowFiveSecond: 100,
+	belowThreeSecond: 10,
 	opening: 2000
 }
 
@@ -234,7 +234,7 @@ if(!useEvalBar) {
 
 var useDefaultFEN = true;
 
-var fen = "3r4/8/3k4/8/8/3K4/8/8";
+var fen = "1r4k1/5Npp/8/3Q4/8/8/P7/K1";
 
 if(useDefaultFEN) {
 	fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -291,10 +291,11 @@ if(PLAY_AS_BLACK_PIECE) {
 			board.positionHistory[stringCode]++;
 		}
 		
-		if(analysisMode && ((!PLAY_AS_BLACK_PIECE && turn == enemy) || (PLAY_AS_BLACK_PIECE && turn == player))) {
+		if(analysisMode && ((!PLAY_AS_BLACK_PIECE && board.turn == enemy) || (PLAY_AS_BLACK_PIECE && board.turn == player))) {
 			bestArrows = [];
 			for(var j = 0; j < bestMove.length; j++) {
-				var { fromGrid, toGrid } = getMoveStringInfo(bestMove[j].move[0]);
+				var fromGrid = FROMSQUARE(bestMove[j].move[0]);
+				var toGrid = TOSQUARE(bestMove[j].move[0]);
 				
 				bestArrows.push(new Arrow(
 					fromGrid,
@@ -622,11 +623,13 @@ main.addEventListener("touchstart", ev => {
 				
 				if(p.isTeam(turn)) {
 					moves.forEach(move => {
-						var { index, toGrid, captureIndex } = getMoveStringInfo(move[0]);
+						var index = PIECEINDEX(move[0]);
+						var toGrid = TOSQUARE(move[0]);
+						var noCapture = NOCAPTURE(move[0]);
 						
 						if(index == i) {
 							var h = document.createElement("div");
-							h.classList.add(captureIndex == -1 ? "move-highlight-quiet" : "move-highlight-capture");
+							h.classList.add(noCapture ? "move-highlight-quiet" : "move-highlight-capture");
 							h.style.width = gridSize + "px";
 							h.style.height = gridSize + "px";
 							h.style.left = grids[toGrid].x + "px";
@@ -760,7 +763,8 @@ function playerMove() {
 			*/
 			
 			moves.forEach(move => {
-				var { index, toGrid } = getMoveStringInfo(move[0]);
+				var index = PIECEINDEX(move[0]);
+				var toGrid = TOSQUARE(move[0]);
 				
 				if(index == selectingIndex) {
 					var grid = grids[toGrid];
@@ -781,8 +785,8 @@ function playerMove() {
 						
 						pieces = makeMove(board, move, false);
 						
-						if(board.moveHistory.length == 0 && useTime) {
-							timerInterval = setInterval(timer, 100);
+						if(useTime && timerInterval == null) {
+							timerInterval = timerInterval = setInterval(timer, 100);
 						}
 						
 						if(board.repetitionMoveHistory[board.posKey] >= 3) {
@@ -818,7 +822,8 @@ function playerMove() {
 							bestArrows = [];
 							
 							setTimeout(function() {
-								var { fromGrid, toGrid } = getMoveStringInfo(analysisBestMove[0].move[0]);
+								var fromGrid = FROMSQUARE(analysisBestMove[0].move[0]);
+								var toGrid = TOSQUARE(analysisBestMove[0].move[0]);
 								
 								bestArrows.push(new Arrow(
 									fromGrid,
@@ -917,7 +922,7 @@ function playerMove() {
 		}
 	}
 }
-
+/*
 setTimeout(() => {
 	setTimeout(u, 0);
 	function u() {
@@ -991,7 +996,8 @@ setTimeout(() => {
 			
 			bestArrows = [];
 			for(var j = 0; j < numberOfArrows; j++) {
-				var { fromGrid, toGrid } = getMoveStringInfo(result[j].move[0]);
+				var fromGrid = FROMSQUARE(result[j].move[0]);
+				var toGrid = TOSQUARE(result[j].move[0]);
 				
 				bestArrows.push(new Arrow(
 					fromGrid,
@@ -1019,3 +1025,94 @@ setTimeout(() => {
 		}, 0);
 	}
 }, 1000);
+*/
+/*
+setTimeout(() => {
+	for(var n = 0; n < 2; n++) {
+		var move = moves[Math.floor(Math.random()*moves.length)];
+		
+		pieces = makeMove(board, move, false);
+		
+		if(board.repetitionMoveHistory[board.posKey] == null) {
+			board.repetitionMoveHistory[board.posKey] = 0;
+		}
+		
+		board.repetitionMoveHistory[board.posKey]++;
+		
+		if(board.repetitionMoveHistory[board.posKey] >= 3) {
+			gameOver = true;
+			gameOverType = 1;
+			gameOverName = "3 Fold Repetition";
+		}
+		
+		currentMoveString = move;
+		
+		board.moveHistory.push(translateToFileRank(move));
+		
+		//document.querySelector("textarea").value = `\n\t"${board.moveHistory.join(" ")}", // placeholder_name`;
+		document.querySelector("textarea").value = `"${board.moveHistory.join(" ")}"`;
+		
+		pieces = removeCapturePieces(board);
+		
+		turn = changeTurn(board);
+		
+		moves = generateMoves(board, board.turn);
+		
+		board = updateBoardInfo(board);
+		
+		if(!gameOver) {
+			var _isGameOver = isGameOver(board, moves, turn);
+			if(_isGameOver.boolean) {
+				gameOver = true;
+				gameOverType = _isGameOver.type;
+				gameOverName = _isGameOver.name;
+				
+				break;
+			}
+		}
+	}
+	
+	for(var i = 0; i < 2; i++) {
+		var result = bestMoves(board, 2, board.turn, useBook);
+		
+		var move = result[0].move;
+		
+		pieces = makeMove(board, move, false);
+		
+		if(board.repetitionMoveHistory[board.posKey] == null) {
+			board.repetitionMoveHistory[board.posKey] = 0;
+		}
+		
+		board.repetitionMoveHistory[board.posKey]++;
+		
+		if(board.repetitionMoveHistory[board.posKey] >= 3) {
+			gameOver = true;
+			gameOverType = 1;
+			gameOverName = "3 Fold Repetition";
+		}
+		
+		currentMoveString = move;
+		
+		board.moveHistory.push(translateToFileRank(move));
+		
+		pieces = removeCapturePieces(board);
+		
+		turn = changeTurn(board);
+		
+		moves = generateMoves(board, board.turn);
+		
+		board = updateBoardInfo(board);
+		
+		if(!gameOver) {
+			var _isGameOver = isGameOver(board, moves, turn);
+			if(_isGameOver.boolean) {
+				gameOver = true;
+				gameOverType = _isGameOver.type;
+				gameOverName = _isGameOver.name;
+				
+				break;
+			}
+		}
+	}
+}, 0);
+*/
