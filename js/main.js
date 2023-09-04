@@ -12,6 +12,14 @@ var coachMessageText = document.querySelector("#coachMessageText");
 var coachMessageBox = document.querySelector("#coachMessageBox");
 var root = document.querySelector(":root");
 
+// checks for landscape view
+
+var isLandscapeView = window.innerWidth > window.innerHeight;
+
+// board size
+
+var boardSize = isLandscapeView ? Math.min(c.width / 2, c.height) : c.width;
+
 /*
 
 PIECE SPRITE STYLE:
@@ -80,7 +88,20 @@ var board = {
 	],
 	posKey: 0,
 	repetitionMoveHistory: [],
-	castlePerm: 15
+	castlePerm: 15,
+	pvTable: [],
+	pvArray: new Array(2048),
+	searchHistory: new Array(14 * 64),
+	searchKillers: new Array(3 * 2048)
+}
+
+// initialize pvTable
+
+for(var i = 0; i < PVENTRIES; i++) {
+	board.pvTable.push({
+		move: NOMOVE,
+		posKey: 0
+	});
 }
 
 // ai display text
@@ -171,7 +192,7 @@ var passAndPlay = false;
 
 var PVE = true;
 
-var depth = 128;
+var depth = 3;
 
 var useBook = true;
 
@@ -203,8 +224,8 @@ var moveHighlightGrids = [];
 // grid options for loading grids
 
 var gridOffsetX = 0;
-var gridOffsetY = 50;
-var gridSize = c.width / 8;
+var gridOffsetY = isLandscapeView ? ((c.height - Math.min(c.width / 2, c.height)) / 2) : 50;
+var gridSize = boardSize / 8;
 
 var ORIENTATION = player;
 
@@ -234,7 +255,7 @@ if(!useEvalBar) {
 
 var useDefaultFEN = true;
 
-var fen = "1r4k1/5Npp/8/3Q4/8/8/P7/K1";
+var fen = "3r4/8/3k4/8/8/3K4/8/8";
 
 if(useDefaultFEN) {
 	fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -275,6 +296,12 @@ if(PLAY_AS_BLACK_PIECE) {
 		var move = selected.move;
 		
 		pieces = makeMove(board, move, false);
+		
+		if(board.repetitionMoveHistory[board.posKey] == null) {
+			board.repetitionMoveHistory[board.posKey] = 0;
+		}
+		
+		board.repetitionMoveHistory[board.posKey]++;
 		
 		if(useTime) {
 			timerInterval = setInterval(timer, 100);
@@ -572,11 +599,35 @@ function rn() {
 }
 
 main.addEventListener("touchstart", ev => {
+	pressStart(ev, true);
+});
+
+main.addEventListener("mousedown", ev => {
+	pressStart(ev, false);
+});
+
+main.addEventListener("touchmove", ev => {
+	pressMove(ev, true);
+});
+
+main.addEventListener("mousemove", ev => {
+	pressMove(ev, false);
+});
+
+main.addEventListener("touchend", ev => {
+	pressEnd(ev, true);
+});
+
+main.addEventListener("mouseup", ev => {
+	pressEnd(ev, false);
+});
+
+function pressStart(ev, isInMobile) {
 	ev.preventDefault();
 	
 	var { pieces, turn } = board;
 	
-	var { clientX, clientY } = ev.touches[0];
+	var { clientX, clientY } = (isInMobile ? ev.touches[0] : ev);
 	
 	press.x = clientX;
 	press.y = clientY;
@@ -669,12 +720,12 @@ main.addEventListener("touchstart", ev => {
 			highlights = [];
 		}
 	}
-});
+}
 
-main.addEventListener("touchmove", ev => {
+function pressMove(ev, isInMobile) {
 	ev.preventDefault();
 	
-	var { clientX, clientY } = ev.touches[0];
+	var { clientX, clientY } = (isInMobile ? ev.touches[0] : ev);
 	
 	var { pieces } = board;
 	
@@ -693,9 +744,9 @@ main.addEventListener("touchmove", ev => {
 			isDraggingPiece = true;
 		}
 	});
-});
+}
 
-main.addEventListener("touchend", ev => {
+function pressEnd(ev, isInMobile) {
 	ev.preventDefault();
 	
 	var { pieces, turn } = board;
@@ -749,7 +800,7 @@ main.addEventListener("touchend", ev => {
 	setTimeout(() => {
 		setCSSVar("--piece-transition", "var(--piece-move-speed) top var(--piece-move-timing-function), var(--piece-move-speed) left var(--piece-move-timing-function), 200ms opacity var(--piece-move-timing-function)");
 	}, 0);
-});
+}
 
 function playerMove() {
 	var { pieces, turn } = board;
@@ -784,6 +835,12 @@ function playerMove() {
 						}
 						
 						pieces = makeMove(board, move, false);
+						
+						if(board.repetitionMoveHistory[board.posKey] == null) {
+							board.repetitionMoveHistory[board.posKey] = 0;
+						}
+						
+						board.repetitionMoveHistory[board.posKey]++;
 						
 						if(useTime && timerInterval == null) {
 							timerInterval = timerInterval = setInterval(timer, 100);
@@ -868,6 +925,12 @@ function playerMove() {
 									}
 									
 									pieces = makeMove(board, move);
+									
+									if(board.repetitionMoveHistory[board.posKey] == null) {
+										board.repetitionMoveHistory[board.posKey] = 0;
+									}
+									
+									board.repetitionMoveHistory[board.posKey]++;
 									
 									board.moveHistory.push(translateToFileRank(move));
 									
@@ -995,6 +1058,7 @@ setTimeout(() => {
 			}
 			
 			bestArrows = [];
+			
 			for(var j = 0; j < numberOfArrows; j++) {
 				var fromGrid = FROMSQUARE(result[j].move[0]);
 				var toGrid = TOSQUARE(result[j].move[0]);
@@ -1028,7 +1092,7 @@ setTimeout(() => {
 */
 /*
 setTimeout(() => {
-	for(var n = 0; n < 2; n++) {
+	for(var n = 0; n < 500; n++) {
 		var move = moves[Math.floor(Math.random()*moves.length)];
 		
 		pieces = makeMove(board, move, false);

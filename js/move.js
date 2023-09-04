@@ -32,6 +32,7 @@ function makeMove(board, moveString, useAnimation = true, drawTrail = true, move
 		var toGrid = TOSQUARE(moveString[i]);
 		var captureIndex = CAPTUREINDEX(moveString[i]);
 		var isPromoting = ISPROMOTING(moveString[i]);
+		var isCastling = ISCASTLING(moveString[i]);
 		var noCapture = NOCAPTURE(moveString[i]);
 		
 		var king = pieces[kingIndex[pieces[index].team == player ? "player" : "enemy"]];
@@ -83,6 +84,44 @@ function makeMove(board, moveString, useAnimation = true, drawTrail = true, move
 		if(moveSprite) {
 			pieces[index].sprite.style.left = `${grids[toGrid].x}px`;
 			pieces[index].sprite.style.top = `${grids[toGrid].y}px`;
+			
+			// plays the audio
+			
+			if(inCheck(board, team == player ? enemy : player)) {
+				checkAudio.play();
+				checkAudio.currentTime = 0;
+			}
+			else if(!noCapture) {
+				captureAudio.play();
+				captureAudio.currentTime = 0;
+			}
+			else {
+				if(isCastling) {
+					castleAudio.play();
+					castleAudio.currentTime = 0;
+				}
+				else if(isPromoting) {
+					promoteAudio.play();
+					promoteAudio.currentTime = 0;
+				}
+				else {
+					if((!PLAY_AS_BLACK_PIECE && team == player) || (PLAY_AS_BLACK_PIECE && team == enemy)) {
+						moveSelfAudio.play();
+						moveSelfAudio.currentTime = 0;
+					}
+					else {
+						moveOpponentAudio.play();
+						moveOpponentAudio.currentTime = 0;
+					}
+				}
+			}
+			
+			var placeholderMoves = generateMoves(board, team == player ? enemy : player);
+			
+			if(isGameOver(board, placeholderMoves, team == player ? enemy : player).boolean) {
+				gameEndAudio.play();
+				gameEndAudio.currentTime = 0;
+			}
 		}
 		
 		// en passant
@@ -252,9 +291,9 @@ function makeMove(board, moveString, useAnimation = true, drawTrail = true, move
 	if(board.repetitionMoveHistory[board.posKey] == null) {
 		board.repetitionMoveHistory[board.posKey] = 0;
 	}
-	
-	board.repetitionMoveHistory[board.posKey]++;
 	*/
+	
+	//board.repetitionMoveHistory[board.posKey]++;
 	
 	board.totalMoves++;
 	
@@ -275,7 +314,7 @@ function unMakeMove(board, moveString) {
 	
 	var _map;
 	
-	// board.repetitionMoveHistory[board.posKey]--;
+	//board.repetitionMoveHistory[board.posKey]--;
 	
 	for(var i = 0; i < moveString.length; i++) {
 		var index = PIECEINDEX(moveString[i]);

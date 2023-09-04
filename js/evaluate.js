@@ -6,8 +6,8 @@ function evaluate(board, lastMove) {
 	var whiteEval = countMaterial(board, player);
 	var blackEval = countMaterial(board, enemy);
 	
-	whiteEval += kingToEdge(board, player, (countMaterial(board, player) - countMaterial(board, enemy)) / 1000);
-	blackEval += kingToEdge(board, enemy, (countMaterial(board, enemy) - countMaterial(board, player)) / 1000);
+	whiteEval += Math.floor(kingToEdge(board, player, (countMaterial(board, player) - countMaterial(board, enemy)) / 100));
+	blackEval += Math.floor(kingToEdge(board, player, (countMaterial(board, enemy) - countMaterial(board, enemy)) / 100));
 	
 	whiteEval += attackingGridEval[player];
 	blackEval += attackingGridEval[enemy];

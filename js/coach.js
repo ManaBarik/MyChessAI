@@ -7,11 +7,13 @@ var glyphRange = {
 }
 
 function setGlyphOnGrid(bestMoveList, move) {
-	var { index, fromGrid, toGrid } = getMoveStringInfo(move[0]);
-	var bestMoveInfo = getMoveStringInfo(bestMoveList[0].move[0]);
-	var bestFrom = bestMoveInfo.fromGrid;
-	var bestTo = bestMoveInfo.toGrid;
-	var bestCapture = bestMoveInfo.captureIndex;
+	var index = PIECEINDEX(move[0]);
+	var fromGrid = FROMSQUARE(move[0]);
+	var toGrid = TOSQUARE(move[0]);
+	var bestFrom = FROMSQUARE(bestMoveList[0].move[0]);
+	var bestTo = TOSQUARE(bestMoveList[0].move[0]);
+	var bestCapture = CAPTUREINDEX(bestMoveList[0].move[0]);
+	var bestNoCapture = NOCAPTURE(bestMoveList[0].move[0]);
 	var { pieces, pieceGrid, turn, kingIndex } = board;
 	
 	var moveIndex = 0;
@@ -186,7 +188,7 @@ function setGlyphOnGrid(bestMoveList, move) {
 			}
 			
 			// doesn't capture anything
-			if(bestCapture == -1) {
+			if(bestNoCapture) {
 				// taking over the center | playing c4, d4, or e4
 				if((bestFrom == 50 && bestTo == 34) || (bestFrom == 51 && bestTo == 35) || (bestFrom == 52 && bestTo == 36)) {
 					updateCoachMessage(`${prefix}${scoreDiff < inaccuracy[0] ? "You had a chance" : "You missed an opportunity"} to control the center! <span style="opacity: 0.3">${(displayEvaluation)}</span>`)

@@ -28,5 +28,5 @@ function kingToEdge(board, team, weight = 1) {
 	var dstBetweenKings = dstBetweenKingsFile + dstBetweenKingsRank;
 	evaluation += 14 - dstBetweenKings;
 	
-	return 100 * evaluation * weight;
+	return evaluation * weight;
 }

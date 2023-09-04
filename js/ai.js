@@ -1,11 +1,13 @@
 var searchOption = {
 	start: 0,
 	stop: false,
-	time: 3500,
+	time: 3000,
 	best: [],
 	nodes: 0,
 	R: 2,
-	maxSearchExtension: 4
+	maxSearchExtension: 4,
+	fhf: 0,
+	fh: 0
 }
 
 function bestMoves(board, depth, firstTurn, useBook = true) {
@@ -17,10 +19,7 @@ function bestMoves(board, depth, firstTurn, useBook = true) {
 		bookMoves = getBookFromMoveHistory(moveHistory);
 	}
 	
-	searchOption.start = Date.now();
-	searchOption.stop = false;
-	searchOption.best = [];
-	searchOption.nodes = 0;
+	clearForSearch();
 	
 	// uses minimax
 	
@@ -44,19 +43,27 @@ function bestMoves(board, depth, firstTurn, useBook = true) {
 				
 				pieces = makeMove(board, move, false, false, false);
 				
+				if(board.repetitionMoveHistory[board.posKey] == null) {
+					board.repetitionMoveHistory[board.posKey] = 0;
+				}
+				
+				board.repetitionMoveHistory[board.posKey]++;
+				
 				turn = changeTurn(board, false, false);
 				
-				var score = -alphaBeta(board, currentDepth - 1, -Infinity, Infinity, firstTurn, currentDepth, move, true, 0);
+				var score = -alphaBeta(board, currentDepth - 1, -Infinity, Infinity, currentDepth, move, true, 0);
 				
 				turn = changeTurn(board, false, false);
+				
+				board.repetitionMoveHistory[board.posKey]--;
 				
 				pieces = unMakeMove(board, move);
-				
-				moveList.push({ move, score });
 				
 				if(searchOption.stop) {
 					break;
 				}
+				
+				moveList.push({ move, score });
 			}
 			
 			if(searchOption.stop) {
@@ -113,8 +120,8 @@ function bestMoves(board, depth, firstTurn, useBook = true) {
 	return searchOption.best;
 }
 
-function alphaBeta(board, depth, alpha, beta, firstTurn, startDepth, lastMove, useNullMove = true, numExtension = 0) {
-	var { turn, positionHistory } = board;
+function alphaBeta(board, depth, alpha, beta, startDepth, lastMove, useNullMove = true, numExtension = 0) {
+	var { turn } = board;
 
 	var perspective = turn == player ? 1 : -1;
 	
@@ -126,16 +133,18 @@ function alphaBeta(board, depth, alpha, beta, firstTurn, startDepth, lastMove, u
 		return 0;
 	}
 	
-	searchOption.nodes++;
-	
-	if(searchOption.nodes % 500 == 0) {
+	if(searchOption.nodes % 1000 == 0) {
 		checkTime(searchOption);
 	}
 	
+	searchOption.nodes++;
+	
+	var isInCheck = inCheck(board, turn);
+	
 	// null move pruning
 	
-	if(useNullMove && !inCheck(board, turn) && depth > 2) {
-		var score = alphaBeta(board, depth - searchOption.R, -beta, -beta + 1, firstTurn, startDepth, lastMove, false, numExtension);
+	if(useNullMove && !isInCheck && depth > 2) {
+		var score = alphaBeta(board, depth - searchOption.R, -beta, -beta + pawnValue, firstTurn, startDepth, lastMove, false, numExtension);
 		
 		if(score >= beta) {
 			return beta;
@@ -146,7 +155,9 @@ function alphaBeta(board, depth, alpha, beta, firstTurn, startDepth, lastMove, u
 	
 	moves = orderMoves(board, moves);
 	
-	var hasMoved = false;
+	var legal = 0;
+	var oldAlpha = alpha;
+	var bestMove = NOMOVE;
 	
 	for(var i = 0; i < moves.length; i++) {
 		var move = moves[i];
@@ -160,31 +171,60 @@ function alphaBeta(board, depth, alpha, beta, firstTurn, startDepth, lastMove, u
 			continue;
 		}
 		
-		hasMoved = true;
+		if(board.repetitionMoveHistory[board.posKey] == null) {
+			board.repetitionMoveHistory[board.posKey] = 0;
+		}
+		
+		board.repetitionMoveHistory[board.posKey]++;
+		
+		legal++;
 		
 		turn = changeTurn(board, false, false);
 		
 		var extension = numExtension < searchOption.maxSearchExtension && inCheck(board, turn) ? 1 : 0;
 		
-		score = -alphaBeta(board, depth - 1 + extension, -beta, -alpha, firstTurn, startDepth, move, useNullMove, numExtension + extension);
+		score = -alphaBeta(board, depth - 1 + extension, -beta, -alpha, startDepth, move, useNullMove, numExtension + extension);
 		
 		turn = changeTurn(board, false, false);
 		
+		board.repetitionMoveHistory[board.posKey]--;
+		
 		pieces = unMakeMove(board, move);
 		
-		alpha = Math.max(alpha, score);
+		if(searchOption.stop) {
+			return 0;
+		}
 		
-		if(score >= beta) {
-			return beta;
+		if(score > alpha) {
+			if(score >= beta) {
+				if(legal == 1) {
+					searchOption.fhf++;
+				}
+				searchOption.fh++;
+				
+				// updates killer move
+				
+				return beta;
+			}
+			
+			alpha = score;
+			
+			bestMove = move;
+			
+			// updates history table
 		}
 	}
 	
-	if(!hasMoved) {
-		if(inCheck(board, turn)) {
+	if(legal == 0) {
+		if(isInCheck) {
 			return -mateValue + 100 * (startDepth - depth);
 		}
 		
 		return 0;
+	}
+	
+	if(alpha != oldAlpha) {
+		storePvTable(bestMove);
 	}
 	
 	return alpha;
@@ -199,52 +239,115 @@ function checkTime(searchOption) {
 // some sort of quiescenceSearch
 // it doesn't continue searching but to evaluate immediately as a "one ply search"
 
-function quiescenceSearch(board, alpha, beta, firstTurn, startDepth, lastMove) {
-	var { turn, pieces } = board;
-	
+function quiescenceSearch(alpha, beta, lastMove, numExtension = 0) {
+	var { turn } = board;
+
 	var perspective = turn == player ? 1 : -1;
 	
-	checkTime(searchOption);
-	
-	var realEval = inCheck(board, board.turn) ? mateValue : evaluate(board, lastMove) * perspective;
-	
-	if(realEval >= beta) {
-		return beta;
-	}
-	
-	var moves = generateMoves(board, turn, true, true);
-	moves = orderMoves(board, moves);
-	
-	var g = isGameOver(board, moves, turn);
-	
-	if(g.boolean) {
-		if(g.type == 0) {
-			return -mateValue + 1000 * (startDepth - depth);
-		}
+	if(board.repetitionMoveHistory[board.posKey] >= 3) {
 		return 0;
 	}
 	
+	if(searchOption.nodes % 1000 == 0) {
+		checkTime(searchOption);
+	}
+	
+	searchOption.nodes++;
+	
+	var score = evaluate(board, lastMove) * perspective;
+	
+	if(score >= beta) {
+		return beta;
+	}
+	
+	if(score > alpha) {
+		alpha = score;
+	}
+	
+	var moves = generatePseudoLegalMoves(board, turn, true, true);
+	
+	moves = orderMoves(board, moves);
+	
+	var legal = 0;
+	var oldAlpha = alpha;
+	var bestMove = NOMOVE;
+	
 	for(var i = 0; i < moves.length; i++) {
 		var move = moves[i];
+		var score;
 		
 		pieces = makeMove(board, move, false, false, false);
 		
+		if(inCheck(board, turn)) {
+			pieces = unMakeMove(board, move);
+			
+			continue;
+		}
+		
+		if(board.repetitionMoveHistory[board.posKey] == null) {
+			board.repetitionMoveHistory[board.posKey] = 0;
+		}
+		
+		board.repetitionMoveHistory[board.posKey]++;
+		
+		legal++;
+		
 		turn = changeTurn(board, false, false);
 		
-		var evaluation = -quiescenceSearch(board, -beta, -alpha, firstTurn, startDepth, lastMove);
+		var extension = numExtension < searchOption.maxSearchExtension && inCheck(board, turn) ? 1 : 0;
+		
+		score = evaluate(board, lastMove) * (turn == player ? 1 : -1);
+		
+		turn = changeTurn(board, false, false);
+		
+		board.repetitionMoveHistory[board.posKey]--;
 		
 		pieces = unMakeMove(board, move);
 		
-		if(evaluation > realEval) {
-			if(evaluation >= beta) {
+		if(searchOption.stop) {
+			return 0;
+		}
+		
+		if(score > alpha) {
+			if(score >= beta) {
+				if(legal == 1) {
+					searchOption.fhf++;
+				}
+				searchOption.fh++;
+				
 				return beta;
 			}
 			
-			alpha = Math.max(alpha, evaluation);
+			alpha = score;
 			
-			realEval = evaluation;
+			bestMove = move;
 		}
 	}
 	
-	return realEval;
+	if(alpha != oldAlpha) {
+		storePvTable(bestMove);
+	}
+	
+	return alpha;
+}
+
+function clearForSearch() {
+	for(var i = 0; i < 14 * 64; i++) {
+		board.searchHistory[i] = 0;
+	}
+	
+	for(var i = 0; i < 3 * 2048; i++) {
+		board.searchKillers[i] = 0;
+	}
+	
+	clearPvTable();
+	
+	Object.assign(searchOption, {
+		start: Date.now(),
+		stop: false,
+		best: NOMOVE,
+		nodes: 0,
+		fhf: 0,
+		fh: 0
+	});
 }

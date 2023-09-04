@@ -34,6 +34,9 @@ var castleBit = {
 	bq: 8
 }
 
+var PVENTRIES = 1000;
+var NOMOVE = [];
+
 var directionOffsets = [-8, 8, -1, 1, -9, 7, -7, 9];
 var distToEdge = [];
 var knightDir = [[-17, -1], [-15, 1], [-10, -2], [-6, 2], [6, -2], [10, 2], [15, -1], [17, 1]];

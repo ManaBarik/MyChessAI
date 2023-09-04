@@ -152,6 +152,11 @@ var books = [
 	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 e4f6 e7f6 f1d3 f8d6 g1f3 b8d7",
 	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 f1d3 e7e6 g1f3 b8d7",
 	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g8f6 e4f6 e7f6 g1f3 c8g4 f1d3 f8d6",
+	"e2e4 c7c6 d2d4 d7d5 b1c3 g7g6 g1f3 f8g7 e4e5 c8f5",
+	"e2e4 c7c6 d2d4 d7d5 b1c3 g7g6 g1f3 f8g7 e4d5 c6d5",
+	"e2e4 c7c6 d2d4 d7d5 f2f3 d5e4 f3e4 e7e6 b1c3 g8f6 e4e5 f6d7 g1f3 f8b4",
+	"e2e4 c7c6 d2d4 d7d5 f2f3 d5e4 f3e4 g7g6 b1c3 f8g7 g1f3 b8d7 f1e2 e7e6",
+	"e2e4 c7c6 d2d4 d7d5 b1c3 d5e4 c3e4 g7g6 g1f3 f8g7 f1e2 b8d7",
 	//advance variation
 	"e2e4 c7c6 f1c4 d7d5 e4d5 c6d5 c4b3 g8f6",
 	"e2e4 c7c6 c2c4 d7d5 c4d5 c6d5 e4d5 d8d5 b1c3 d5a5 d2d4 g8f6",
