@@ -144,7 +144,7 @@ function alphaBeta(board, depth, alpha, beta, startDepth, lastMove, useNullMove 
 	// null move pruning
 	
 	if(useNullMove && !isInCheck && depth > 2) {
-		var score = alphaBeta(board, depth - searchOption.R, -beta, -beta + pawnValue, firstTurn, startDepth, lastMove, false, numExtension);
+		var score = alphaBeta(board, depth - searchOption.R, -beta, -beta + pawnValue, startDepth, lastMove, false, numExtension);
 		
 		if(score >= beta) {
 			return beta;
