@@ -470,7 +470,7 @@ function countAttacker(board, pos, team) {
 }
 
 function hashPiece(board, type, team, pos) {
-	board.posKey ^= pieceKey[type * (team == player ? 1 : 2) + pos];
+	board.posKey ^= pieceKey[type + (team == player ? 1 : 6) + pos];
 }
 
 function hashTurn(board) {

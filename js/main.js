@@ -92,7 +92,9 @@ var board = {
 	pvTable: [],
 	pvArray: new Array(2048),
 	searchHistory: new Array(14 * 64),
-	searchKillers: new Array(3 * 2048)
+	searchKillers: new Array(3 * 2048),
+	moves: [],
+	moveScores: []
 }
 
 // initialize pvTable
@@ -107,10 +109,12 @@ for(var i = 0; i < PVENTRIES; i++) {
 // ai display text
 
 var depthSearchText = 0;
+var moveOrderText = "";
 
 // lists of available moves
 
 var moves = [];
+var moveScores = [];
 
 // arrows and highlight
 
@@ -192,7 +196,7 @@ var passAndPlay = false;
 
 var PVE = true;
 
-var depth = 3;
+var depth = 128;
 
 var useBook = true;
 
@@ -255,7 +259,7 @@ if(!useEvalBar) {
 
 var useDefaultFEN = true;
 
-var fen = "3r4/8/3k4/8/8/3K4/8/8";
+var fen = "k7/8/8/7p/4p2P/4P3/8/K7";
 
 if(useDefaultFEN) {
 	fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
@@ -576,6 +580,7 @@ function rn() {
 	ctx.fillStyle = "white";
 	ctx.textAlign = "left";
 	ctx.fillText(`Depth searched: ${depthSearchText}`, 5, gridOffsetY + gridSize * 8 + 45);
+	ctx.fillText(`Move order: ${moveOrderText}`, 5, gridOffsetY + gridSize * 8 + 70);
 	
 	if(gameOver) {
 		ctx.fillStyle = "white";

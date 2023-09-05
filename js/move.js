@@ -239,7 +239,15 @@ function makeMove(board, moveString, useAnimation = true, drawTrail = true, move
 				break;
 			}
 			
+			// updates hash key
+			
+			hashPiece(board, piece.pawn, team, toGrid);
+			
 			pieces[index].changeType(promotionType);
+			
+			// updates hash key
+			
+			hashPiece(board, promotionType, team, toGrid);
 			
 			board.material[pieces[index].team] += getPieceValue(pieces[index].type);
 		}
@@ -349,7 +357,13 @@ function unMakeMove(board, moveString) {
 		var team = pieces[index].team;
 		
 		if(isPromoting) {
+			// updates hash key
+			
+			hashPiece(board, piece.pawn, team, toGrid);
+			
 			board.material[pieces[index].team] -= getPieceValue(pieces[index].type);
+			
+			hashPiece(board, pieceGrid[toGrid].type, toGrid);
 			
 			pieces[index].changeType(piece.pawn);
 		}

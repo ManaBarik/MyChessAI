@@ -1,13 +1,52 @@
 var searchOption = {
 	start: 0,
 	stop: false,
-	time: 3000,
+	time: 2000,
 	best: [],
 	nodes: 0,
 	R: 2,
 	maxSearchExtension: 4,
 	fhf: 0,
 	fh: 0
+}
+
+var mvvlvaValue = [pawnValue, bishopValue, knightValue, rookValue, queenValue, 0, pawnValue, bishopValue, knightValue, rookValue, queenValue, 0];
+var mvvlvaScores = new Array(14 * 14);
+
+function initMVVLVA() {
+	var attacker, victim;
+	
+	for(attacker = 0; attacker < 12; attacker++) {
+		for(victim = 0; victim < 12; victim++) {
+			mvvlvaScores[victim * 12 + attacker] = mvvlvaValue[victim] + 6 - (mvvlvaValue[attacker] / 100);
+		}
+	}
+}
+
+initMVVLVA();
+
+function pickNextMove(moves, moveIndex) {
+	var bestScore = -1;
+	var bestIndex = 0;
+	
+	for(var i = moveIndex; i < moveScores.length; i++) {
+		if(moveScores[i] > bestScore) {
+			bestScore = moveScores[i];
+			bestIndex = i;
+		}
+	}
+	
+	if(bestIndex != moveIndex) {
+		var switchedScore = moveScores[moveIndex];
+		moveScores[moveIndex] = moveScores[bestIndex];
+		moveScores[bestIndex] = switchedScore;
+		
+		var switchedMove = moves[moveIndex];
+		moves[moveIndex] = moves[bestIndex];
+		moves[bestIndex] = switchedMove;
+	}
+	
+	return { moves, moveScores };
 }
 
 function bestMoves(board, depth, firstTurn, useBook = true) {
@@ -115,6 +154,8 @@ function bestMoves(board, depth, firstTurn, useBook = true) {
 	}
 	
 	depthSearchText = (!useBook || bookMoves.length == 0) ? bestDepth : "Book";
+	moveOrderText = (!useBook || bookMoves.length == 0) ? `${((searchOption.fhf / searchOption.fh) * 100).toFixed(2)}%` : "Book";
+	
 	updateEvalBar(searchOption.best[0].score / 10);
 	
 	return searchOption.best;

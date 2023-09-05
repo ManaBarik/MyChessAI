@@ -1,7 +1,12 @@
+function addMvvlvaScore(victimIndex, attackerType) {
+	moveScores.push(victimIndex == -1 ? 0 : (mvvlvaScores[board.pieces[victimIndex].type] * 12 + attackerType + 1000000));
+}
+
 function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCaptures = false) {
 	var { pieces, pieceGrid, kingIndex, attackingGridEval } = board;
 	
 	var moves = [];
+	moveScores = [];
 	
 	attackingGridEval[team] = 0;
 	
@@ -328,6 +333,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 									0
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 						}
 						else {
@@ -340,6 +347,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 									0
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 						}
 						
@@ -358,6 +367,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 										0,
 										0
 									)]);
+									
+									addMvvlvaScore(-1, pieces[i].type);
 								}
 							}
 							else {
@@ -370,6 +381,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 										0,
 										0
 									)]);
+									
+									addMvvlvaScore(-1, pieces[i].type);
 								}
 							}
 						}
@@ -386,6 +399,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 										((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 										0
 									)]);
+									
+									addMvvlvaScore(Ctl, pieces[i].type);
 								}
 							}
 						}
@@ -400,6 +415,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 										((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 										0
 									)]);
+									
+									addMvvlvaScore(Ctl, pieces[i].type);
 								}
 							}
 						}
@@ -416,6 +433,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 										((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 										0
 									)]);
+									
+									addMvvlvaScore(Ctr, pieces[i].type);
 								}
 							}
 						}
@@ -430,6 +449,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 										((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 										0
 									)]);
+									
+									addMvvlvaScore(Ctr, pieces[i].type);
 								}
 							}
 						}
@@ -515,6 +536,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Ctl, pieces[i].type);
 							}
 						}
 					}
@@ -529,6 +552,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Ctl, pieces[i].type);
 							}
 						}
 					}
@@ -545,6 +570,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Ctr, pieces[i].type);
 							}
 						}
 					}
@@ -559,6 +586,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Ctr, pieces[i].type);
 							}
 						}
 					}
@@ -575,6 +604,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Clt, pieces[i].type);
 							}
 						}
 					}
@@ -589,6 +620,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Clt, pieces[i].type);
 							}
 						}
 					}
@@ -605,6 +638,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Clb, pieces[i].type);
 							}
 						}
 					}
@@ -619,6 +654,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Clb, pieces[i].type);
 							}
 						}
 					}
@@ -635,6 +672,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Crt, pieces[i].type);
 							}
 						}
 					}
@@ -649,6 +688,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Crt, pieces[i].type);
 							}
 						}
 					}
@@ -665,6 +706,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Crb, pieces[i].type);
 							}
 						}
 					}
@@ -679,6 +722,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Crb, pieces[i].type);
 							}
 						}
 					}
@@ -695,6 +740,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Cbl, pieces[i].type);
 							}
 						}
 					}
@@ -709,6 +756,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Cbl, pieces[i].type);
 							}
 						}
 					}
@@ -725,6 +774,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Cbr, pieces[i].type);
 							}
 						}
 					}
@@ -739,6 +790,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(Cbr, pieces[i].type);
 							}
 						}
 					}
@@ -825,6 +878,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 							
 							if(pieceGrid[59] == undefined && pieceGrid[58] == undefined && pieceGrid[57] == undefined &&
@@ -846,6 +901,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 						}
 						else if(team == enemy &&
@@ -869,6 +926,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 							
 							if(pieceGrid[3] == undefined && pieceGrid[2] == undefined && pieceGrid[1] == undefined &&
@@ -890,6 +949,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 						}
 					}
@@ -932,6 +993,8 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore((targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[i].team) ? targetGridPiece : -1, pieces[i].type);
 							}
 						}
 					}
@@ -997,6 +1060,8 @@ function generateSlidingMoves(board, pos, index, moves, checkingGrid, isInCheck,
 							0,
 							0
 						)]);
+						
+						addMvvlvaScore((targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[index].team) ? targetGridPiece : -1, pieces[index].type);
 					}
 				}
 			}
@@ -1011,6 +1076,8 @@ function generateSlidingMoves(board, pos, index, moves, checkingGrid, isInCheck,
 							0,
 							0
 						)]);
+						
+						addMvvlvaScore((targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[index].team) ? targetGridPiece : -1, pieces[index].type);
 					}
 				}
 			}
@@ -1026,7 +1093,7 @@ function generateSlidingMoves(board, pos, index, moves, checkingGrid, isInCheck,
 
 function orderMoves(board, moves) {
 	var { pieces, promotionSelection, turn, pieceGrid } = board;
-	
+	/*
 	var sortedMoves = new Array(64);
 	var newMoves = [];
 	
@@ -1084,6 +1151,32 @@ function orderMoves(board, moves) {
 	sortedMoves.forEach(value => {
 		if(value != null) newMoves.push(value);
 	});
+	*/
+	
+	var newMoves = [];
+	var newMoveScores = [];
+	
+	var iteration = moveScores.length;
+	
+	for(var i = 0; i < iteration; i++) {
+		var bestScore = -Infinity;
+		var bestIndex = 0;
+		
+		for(var j = 0; j < moveScores.length; j++) {
+			if(moveScores[j] > bestScore) {
+				bestScore = moveScores[j];
+				bestIndex = j;
+			}
+		}
+		
+		newMoves.push(moves[bestIndex]);
+		newMoveScores.push(moveScores[bestIndex]);
+		
+		moves.splice(bestIndex, 1);
+		moveScores.splice(bestIndex, 1);
+	}
+	
+	moveScores = newMoveScores;
 	
 	return newMoves;
 }
@@ -1092,6 +1185,7 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 	var { pieces, pieceGrid, kingIndex, attackingGridEval } = board;
 	
 	var moves = [];
+	moveScores = [];
 	
 	// main move generation
 	
@@ -1113,6 +1207,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 							0,
 							0
 						)]);
+						
+						addMvvlvaScore(pieces[i].enPassantCapture, pieces[i].type);
 					}
 				}
 				
@@ -1153,6 +1249,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 								((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 								0
 							)]);
+							
+							addMvvlvaScore(-1, pieces[i].type);
 						}
 						
 						// double pawns
@@ -1169,6 +1267,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 						}
 					}
@@ -1183,6 +1283,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 									0
 								)]);
+								
+								addMvvlvaScore(Ctl, pieces[i].type);
 							}
 						}
 					}
@@ -1197,6 +1299,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									((pieces[i].isTeam(player) && targetGrid < 8) || (pieces[i].isTeam(enemy) && targetGrid >= 56) ? 1 : 0),
 									0
 								)]);
+								
+								addMvvlvaScore(Ctr, pieces[i].type);
 							}
 						}
 					}
@@ -1270,116 +1374,132 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 				}
 				
 				if((!ctl || Ctl != -1) && tl >= 0 && tl < 64 && t % 8 - 1 >= 0 && t >= 0) {
-						if(pieces[i].canMoveTo[tl]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctl != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									tl,
-									Ctl,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[tl]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctl != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								tl,
+								Ctl,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Ctl, pieces[i].type);
 						}
+					}
 				}
 				if((!ctr || Ctr != -1) && tr >= 0 && tr < 64 && t % 8 + 1 < 8 && t >= 0) {
-						if(pieces[i].canMoveTo[tr]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctr != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									tr,
-									Ctr,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[tr]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Ctr != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								tr,
+								Ctr,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Ctr, pieces[i].type);
 						}
+					}
 				}
 				if((!clt || Clt != -1) && lt >= 0 && lt < 64 && pieces[i].pos % 8 - 2 >= 0) {
-						if(pieces[i].canMoveTo[lt]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Clt != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									lt,
-									Clt,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[lt]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Clt != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								lt,
+								Clt,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Clt, pieces[i].type);
 						}
+					}
 				}
 				if((!clb || Clb != -1) && lb >= 0 && lb < 64 && pieces[i].pos % 8 - 2 >= 0) {
-						if(pieces[i].canMoveTo[lb]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Clb != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									lb,
-									Clb,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[lb]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Clb != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								lb,
+								Clb,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Clb, pieces[i].type);
 						}
+					}
 				}
 				if((!crt || Crt != -1) && rt >= 0 && rt < 64 && pieces[i].pos % 8 + 2 < 8) {
-						if(pieces[i].canMoveTo[rt]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Crt != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									rt,
-									Crt,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[rt]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Crt != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								rt,
+								Crt,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Crt, pieces[i].type);
 						}
+					}
 				}
 				if((!crb || Crb != -1) && rb >= 0 && rb < 64 && pieces[i].pos % 8 + 2 < 8) {
-						if(pieces[i].canMoveTo[rb]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Crb != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									rb,
-									Crb,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[rb]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Crb != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								rb,
+								Crb,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Crb, pieces[i].type);
 						}
+					}
 				}
 				if((!cbl || Cbl != -1) && bl >= 0 && bl < 64 && b % 8 - 1 >= 0 && b < 64) {
-						if(pieces[i].canMoveTo[bl]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Cbl != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									bl,
-									Cbl,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[bl]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Cbl != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								bl,
+								Cbl,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Cbl, pieces[i].type);
 						}
+					}
 				}
 				if((!cbr || Cbr != -1) && br >= 0 && br < 64 && b % 8 + 1 < 8 && b < 64) {
-						if(pieces[i].canMoveTo[br]) {
-							if(!onlyGenerateCaptures || (onlyGenerateCaptures && Cbr != -1)) {
-								moves.push([Move(
-									i,
-									pieces[i].pos,
-									br,
-									Cbr,
-									0,
-									0
-								)]);
-							}
+					if(pieces[i].canMoveTo[br]) {
+						if(!onlyGenerateCaptures || (onlyGenerateCaptures && Cbr != -1)) {
+							moves.push([Move(
+								i,
+								pieces[i].pos,
+								br,
+								Cbr,
+								0,
+								0
+							)]);
+							
+							addMvvlvaScore(Cbr, pieces[i].type);
 						}
+					}
 				}
 			}
 			if(pieces[i].isType(piece.king)) {
@@ -1463,6 +1583,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 							
 							if(pieceGrid[59] == undefined && pieceGrid[58] == undefined && pieceGrid[57] == undefined &&
@@ -1484,6 +1606,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 						}
 						else if(team == enemy &&
@@ -1507,6 +1631,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 							
 							if(pieceGrid[3] == undefined && pieceGrid[2] == undefined && pieceGrid[1] == undefined &&
@@ -1528,6 +1654,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									0,
 									1
 								)]);
+								
+								addMvvlvaScore(-1, pieces[i].type);
 							}
 						}
 					}
@@ -1569,6 +1697,8 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 									0,
 									0
 								)]);
+								
+								addMvvlvaScore((targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[i].team) ? targetGridPiece : -1, pieces[i].type);
 							}
 						}
 					}
@@ -1599,17 +1729,19 @@ function generatePseudoLegalSlidingMoves(board, pos, index, moves, onlyGenerateC
 				break;
 			}
 			
-				if(pieces[index].canMoveTo[targetGrid]) {
-					if(!onlyGenerateCaptures || (onlyGenerateCaptures && targetGridPiece != -1)) {
-						moves.push([Move(
-							index,
-							pieces[index].pos,
-							targetGrid,
-							(targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[index].team) ? targetGridPiece : -1,
-							0,
-							0
-						)]);
-					}
+			if(pieces[index].canMoveTo[targetGrid]) {
+				if(!onlyGenerateCaptures || (onlyGenerateCaptures && targetGridPiece != -1)) {
+					moves.push([Move(
+						index,
+						pieces[index].pos,
+						targetGrid,
+						(targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[index].team) ? targetGridPiece : -1,
+						0,
+						0
+					)]);
+					
+					addMvvlvaScore((targetGridPiece != -1 && pieces[targetGridPiece].team != pieces[index].team) ? targetGridPiece : -1, pieces[index].type);
+				}
 			}
 			
 			if(targetGridPiece != -1 && !pieces[targetGridPiece].isTeam(pieces[index].team) && !pieces[targetGridPiece].captured) {
