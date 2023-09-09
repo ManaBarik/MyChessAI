@@ -1086,7 +1086,7 @@ setTimeout(() => {
 				}
 				else {
 					if(!gameOver) {
-						//depth = turn == player ? 3 : 2;
+						depth = turn == player ? 3 : 2	; so
 						setTimeout(u, enemyMoveDelay);
 					}
 				}

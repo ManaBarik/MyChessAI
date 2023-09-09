@@ -931,7 +931,7 @@ function generateMoves(board, team, generateCastlingMoves = true, onlyGenerateCa
 							}
 							
 							if(pieceGrid[3] == undefined && pieceGrid[2] == undefined && pieceGrid[1] == undefined &&
-							!isGridAttacked(board, 3, enemy) && !isGridAttacked(board, 2, player) &&
+							!isGridAttacked(board, 3, enemy) && !isGridAttacked(board, 2, enemy) &&
 							pieceGrid[0] != undefined && pieceGrid[0].isType(piece.rook) && pieceGrid[0].isTeam(enemy) &&
 							board.castlePerm & castleBit.bq) {
 								moves.push([Move(
@@ -1636,7 +1636,7 @@ function generatePseudoLegalMoves(board, team, generateCastlingMoves = true, onl
 							}
 							
 							if(pieceGrid[3] == undefined && pieceGrid[2] == undefined && pieceGrid[1] == undefined &&
-							!isGridAttacked(board, 3, enemy) && !isGridAttacked(board, 2, player) &&
+							!isGridAttacked(board, 3, enemy) && !isGridAttacked(board, 2, enemy) &&
 							pieceGrid[0] != undefined && pieceGrid[0].isType(piece.rook) && pieceGrid[0].isTeam(enemy) &&
 							board.castlePerm & castleBit.bq) {
 								moves.push([Move(
